@@ -6,14 +6,35 @@ from abc import ABC, abstractmethod
 
 
 class Classifier(ABC):
+    """
+    abstract Classifier class that all classes inherit from
+    """
+
     @abstractmethod
     def fit(self, X, y): pass
 
     @abstractmethod
     def predict(self, X): pass
 
-    @abstractmethod
-    def score(self, X, y): pass
+    def score(self, X, y):
+        self.fit(X, y)
+        y_hat = self.predict(X)
+        positive = sum(y[y == 1])
+        negative = sum(y[y == -1])
+        false_positive = sum([1 for i in range(len(y_hat)) if y_hat[i] == 1 and y[i] == -1])
+        false_negative = sum([1 for i in range(len(y_hat)) if y_hat[i] == -1 and y[i] == 1])
+        true_positive = sum([1 for i in range(len(y_hat)) if y_hat[i] == 1 and y[i] == 1])
+        true_negative = sum([1 for i in range(len(y_hat)) if y_hat[i] == -1 and y[i] == -1])
+
+        return {
+            'num_samples': X.shape[0],
+            'error': (false_positive + false_negative) / (positive + negative),
+            'accuracy': (true_positive + true_negative) / (positive + negative),
+            'FPR': false_positive / negative,
+            'TPR': true_positive / positive,
+            'precision': true_positive / (true_positive + false_positive),
+            'specificity': true_negative / negative
+        }
 
 
 class Perceptron(Classifier):
@@ -48,16 +69,7 @@ class Perceptron(Classifier):
         return np.sign(X @ self._w)
 
     def score(self, X, y):
-        d = {
-            'num_samples': X.shape[0],
-            'error': 1,
-            'accuracy': 1,
-            'FPR': 1,
-            'TPR': 1,
-            'precision': 1,
-            'specificity': 1
-        }
-        return d
+        return super().score(X, y)
 
 
 class LDA(Classifier):
@@ -90,7 +102,7 @@ class LDA(Classifier):
         return [-1 if argmax_index[i] == 0 else 1 for i in range(m)]
 
     def score(self, X, y):
-        pass
+        return super().score(X, y)
 
 
 class SVM(Classifier):
