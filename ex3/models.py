@@ -10,21 +10,43 @@ class Classifier(ABC):
     abstract Classifier class that all classes inherit from
     """
 
-    @abstractmethod
-    def fit(self, X, y): pass
+    def __init__(self):
+        self.model = None
 
     @abstractmethod
-    def predict(self, X): pass
+    def fit(self, X, y):
+        """
+        this method learns the parameters of the model and stores the trained model (namely, the variables that
+        define hypothesis chosen) in self.model. The method returns nothing.
+        :param X: training set as X(m over d)
+        :param y: (d rows of +-1)
+        """
+        pass
+
+    @abstractmethod
+    def predict(self, X):
+        """
+        predicts the label of each sample.
+        :param X: unlabled test set with m' rows and d columns
+        :return: vector of predicted labels y with m' rows of +1 or -1
+        """
+        pass
 
     def score(self, X, y):
+        """
+        :param X: unlabled test set with m' rows and d columns
+        :param y: true labels - vector of predicted labels y with m' rows of +1 or -1
+        :return: dictionary with relevant scores
+        """
         self.fit(X, y)
         y_hat = self.predict(X)
+        m = len(y_hat)
         positive = sum(y[y == 1])
         negative = sum(y[y == -1])
-        false_positive = sum([1 for i in range(len(y_hat)) if y_hat[i] == 1 and y[i] == -1])
-        false_negative = sum([1 for i in range(len(y_hat)) if y_hat[i] == -1 and y[i] == 1])
-        true_positive = sum([1 for i in range(len(y_hat)) if y_hat[i] == 1 and y[i] == 1])
-        true_negative = sum([1 for i in range(len(y_hat)) if y_hat[i] == -1 and y[i] == -1])
+        false_positive = sum([1 for i in range(m) if y_hat[i] == 1 and y[i] == -1])
+        false_negative = sum([1 for i in range(m) if y_hat[i] == -1 and y[i] == 1])
+        true_positive = sum([1 for i in range(m) if y_hat[i] == 1 and y[i] == 1])
+        true_negative = sum([1 for i in range(m) if y_hat[i] == -1 and y[i] == -1])
 
         return {
             'num_samples': X.shape[0],
@@ -40,6 +62,7 @@ class Classifier(ABC):
 class Perceptron(Classifier):
 
     def __init__(self):
+        super().__init__()
         self._w = None  # module weights initialization
 
     def fit(self, X, y):
@@ -75,6 +98,7 @@ class Perceptron(Classifier):
 class LDA(Classifier):
     def __init__(self):
         # two lists (one for +1 and the other for -1) of delta function for every row in X
+        super().__init__()
         self.d_plus = None
         self.d_minus = None
 
@@ -107,41 +131,44 @@ class LDA(Classifier):
 
 class SVM(Classifier):
     def __init__(self):
-        self.svm = SVC(C=1e10, kernel='linear')
+        super().__init__()
+        self.model = SVC(C=1e10, kernel='linear')
 
     def fit(self, X, y):
-        self.svm.fit(X, y)
+        self.model.fit(X, y)
 
     def predict(self, X):
-        return self.svm.predict(X)
+        return self.model.predict(X)
 
     def score(self, X, y):
-        return self.svm.score(X, y)
+        return self.model.score(X, y)
 
 
 class Logistic(Classifier):
     def __init__(self):
-        self.logistic = LogisticRegression(solver='liblinear')
+        super().__init__()
+        self.model = LogisticRegression(solver='liblinear')
 
     def fit(self, X, y):
-        self.logistic.fit(X, y)
+        self.model.fit(X, y)
 
     def predict(self, X):
-        return self.logistic.predict(X)
+        return self.model.predict(X)
 
     def score(self, X, y):
-        return self.logistic.score(X, y)
+        return self.model.score(X, y)
 
 
 class DecisionTree(Classifier):
     def __init__(self):
-        self.tree = DecisionTreeClassifier()
+        super().__init__()
+        self.model = DecisionTreeClassifier()
 
     def fit(self, X, y):
-        self.tree.fit(X, y)
+        self.model.fit(X, y)
 
     def predict(self, X):
-        return self.tree.predict(X)
+        return self.model.predict(X)
 
     def score(self, X, y):
-        return self.tree.score(X, y)
+        return self.model.score(X, y)
