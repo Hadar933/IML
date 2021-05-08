@@ -77,7 +77,6 @@ class Perceptron(Classifier):
                     changed_w = True
                     self._w += (y[i] * new_X[i])
 
-
     def predict(self, X):
         return np.sign(np.insert(X, 0, 1, axis=1) @ self._w)
 
