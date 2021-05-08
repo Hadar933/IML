@@ -41,8 +41,8 @@ class Classifier(ABC):
         self.fit(X, y)
         y_hat = self.predict(X)
         m = len(y_hat)
-        positive = sum(y[y == 1])
-        negative = sum(y[y == -1])
+        positive = sum([1 for item in y if item == 1])
+        negative = sum([1 for item in y if item == -1])
         false_positive = sum([1 for i in range(m) if y_hat[i] == 1 and y[i] == -1])
         false_negative = sum([1 for i in range(m) if y_hat[i] == -1 and y[i] == 1])
         true_positive = sum([1 for i in range(m) if y_hat[i] == 1 and y[i] == 1])
@@ -68,18 +68,18 @@ class Perceptron(Classifier):
     def fit(self, X, y):
         new_X = np.insert(X, 0, 1, axis=1)  # add column of ones to the beginning of X (for the non-homogenous case)
         m, d = new_X.shape[0], new_X.shape[1]
-        self._w = np.zeros((d, 1))
-        entered_if = False  # if we didnt enter the inner if for all i in m, we can return
-        while True:
+        self._w = np.zeros(d)
+        changed_w = True  # if we didnt enter the inner if for all i in m, we can return
+        while changed_w:
+            changed_w = False
             for i in range(m):
-                if y[i] * np.dot(self._w[i], new_X[i]) <= 0:
-                    entered_if = True
+                if y[i] * np.dot(self._w, new_X[i]) <= 0:
+                    changed_w = True
                     self._w += (y[i] * new_X[i])
-            if not entered_if:
-                break
+
 
     def predict(self, X):
-        return np.sign(X @ self._w)
+        return np.sign(np.insert(X, 0, 1, axis=1) @ self._w)
 
     def score(self, X, y):
         return super().score(X, y)
@@ -152,7 +152,7 @@ class Logistic(Classifier):
 class DecisionTree(Classifier):
     def __init__(self):
         super().__init__()
-        self.model = DecisionTreeClassifier()
+        self.model = DecisionTreeClassifier(max_depth=5)
 
     def fit(self, X, y):
         self.model.fit(X, y)
