@@ -2,9 +2,21 @@ import numpy as np
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
+from abc import ABC, abstractmethod
 
 
-class Perceptron:
+class Classifier(ABC):
+    @abstractmethod
+    def fit(self, X, y): pass
+
+    @abstractmethod
+    def predict(self, X): pass
+
+    @abstractmethod
+    def score(self, X, y): pass
+
+
+class Perceptron(Classifier):
 
     def __init__(self):
         self._w = None  # module weights initialization
@@ -48,7 +60,7 @@ class Perceptron:
         return d
 
 
-class LDA:
+class LDA(Classifier):
     def __init__(self):
         # two lists (one for +1 and the other for -1) of delta function for every row in X
         self.d_plus = None
@@ -81,7 +93,7 @@ class LDA:
         pass
 
 
-class SVM:
+class SVM(Classifier):
     def __init__(self):
         self.svm = SVC(C=1e10, kernel='linear')
 
@@ -95,7 +107,7 @@ class SVM:
         return self.svm.score(X, y)
 
 
-class Logistic:
+class Logistic(Classifier):
     def __init__(self):
         self.logistic = LogisticRegression(solver='liblinear')
 
@@ -109,7 +121,7 @@ class Logistic:
         return self.logistic.score(X, y)
 
 
-class DecisionTree:
+class DecisionTree(Classifier):
     def __init__(self):
         self.tree = DecisionTreeClassifier()
 
