@@ -66,12 +66,6 @@ class Perceptron(Classifier):
         self._w = None  # module weights initialization
 
     def fit(self, X, y):
-        """
-        updates the weights using the Perceptron Algorithm
-        :param X: m rows (Samples) d columns (features)
-        :param y: {+-1}^m
-        :return: w (weights) d rows
-        """
         new_X = np.insert(X, 0, 1, axis=1)  # add column of ones to the beginning of X (for the non-homogenous case)
         m, d = new_X.shape[0], new_X.shape[1]
         self._w = np.zeros((d, 1))
@@ -85,10 +79,6 @@ class Perceptron(Classifier):
                 break
 
     def predict(self, X):
-        """
-        :param X: m' rows over d features
-        :return: eitehr 1 or -1 depending on Xw
-        """
         return np.sign(X @ self._w)
 
     def score(self, X, y):
