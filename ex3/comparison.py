@@ -1,10 +1,8 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import plotly.io as pio
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from models import Perceptron, SVM, LDA
-import plotly.express as px
 
 pio.renderers.default = "browser"
 
@@ -108,13 +106,12 @@ def q10():
     return all_accuracies
 
 
-def plot_accuracies(acc):
-    y_data = [[acc[i][model_name] for i in range(len(acc))] for model_name in ["Perceptron", "SVM", "LDA"]]
-    x_data = [5, 10, 15, 25, 70]
+def plot_accuracies(acc, x_data):
+    names = ["Perceptron", "SVM", "LDA"]
+    y_data = [[acc[i][model_name] for i in range(len(acc))] for model_name in names]
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x_data, y=y_data[0], mode='lines+markers', name='Perceptron'))
-    fig.add_trace(go.Scatter(x=x_data, y=y_data[1], mode='lines+markers', name='SVM'))
-    fig.add_trace(go.Scatter(x=x_data, y=y_data[2], mode='lines+markers', name='LDA'))
+    for i in range(len(names)):
+        fig.add_trace(go.Scatter(x=x_data, y=y_data[i], mode='lines+markers', name=names[i]))
     fig.update_layout(title=rf"$\text{{Mean Accuracy as a function of m samples}}$")
     fig.update_xaxes(title_text=rf"$\text{{samples (m)}}$")
     fig.update_yaxes(title_text=rf"$\text{{Mean Accuracy}}$")
@@ -122,4 +119,4 @@ def plot_accuracies(acc):
 
 
 a = q10()
-plot_accuracies(a)
+plot_accuracies(a, [5, 10, 15, 25, 70])
