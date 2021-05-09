@@ -88,30 +88,30 @@ class LDA(Classifier):
     def __init__(self):
         # two lists (one for +1 and the other for -1) of delta function for every row in X
         super().__init__()
-        self.d_plus = None
-        self.d_minus = None
-
-    def _discriminant_func(self, x, y, y_val):
-        """
-        :param x: some sample (row of X) with d elements
-        :param y: vector of m values
-        :param y_val: +1 or -1
-        :return: delta(x) - a number
-        """
-        filtered_x = x[y == y_val]  # fetch samples only if y fits the given y val
-        mean_mu = np.array(np.mean(x[i] for i in filtered_x))
-        inv_cov_sigma = np.linalg.pinv(np.cov(x))
-        prob_y = np.mean(y[y == y_val])
-        return x.T @ inv_cov_sigma @ mean_mu - 0.5 * mean_mu.T @ inv_cov_sigma @ mean_mu + np.log(prob_y)
+        self.d_pos = None  # delta plus function
+        self.d_neg = None  # delta neg function
 
     def fit(self, X, y):
         new_X = np.insert(X, 0, 1, axis=1)
-        self.d_plus = [self._discriminant_func(row, y, 1) for row in new_X]
-        self.d_minus = [self._discriminant_func(row, y, -1) for row in new_X]
+        X_pos = new_X[y == 1]
+        X_neg = new_X[y == -1]
+
+        mu_pos = np.array([np.mean(row) for row in X_pos.T])
+        mu_neg = np.array([np.mean(row) for row in X_neg.T])
+        sigma_inv = np.linalg.pinv(np.cov(new_X.T))
+        prob_pos = sum([1 for i in y if i == 1]) / len(y)
+        prob_neg = sum([1 for i in y if i == -1]) / len(y)
+
+        self.d_pos = lambda x: x.T @ sigma_inv @ mu_pos - 0.5 * mu_pos.T @ sigma_inv @ mu_pos + np.log(prob_pos)
+        self.d_neg = lambda x: x.T @ sigma_inv @ mu_neg - 0.5 * mu_neg.T @ sigma_inv @ mu_neg + np.log(prob_neg)
 
     def predict(self, X):
         m = X.shape[0]
-        argmax_index = [(np.argmax([self.d_minus[i], self.d_plus[i]]) for i in range(m))]
+        new_X = np.insert(X, 0, 1, axis=1)
+
+        d_pos_arr = [self.d_pos(x) for x in new_X]
+        d_neg_arr = [self.d_neg(x) for x in new_X]
+        argmax_index = [np.argmax([d_pos_arr[i], d_neg_arr[i]]) for i in range(m)]
         return [-1 if argmax_index[i] == 0 else 1 for i in range(m)]
 
     def score(self, X, y):

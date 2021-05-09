@@ -2,7 +2,7 @@ import numpy as np
 import plotly.io as pio
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from models import Perceptron, SVM
+from models import Perceptron, SVM, LDA
 
 pio.renderers.default = "browser"
 
@@ -61,4 +61,43 @@ def plot_points():
         fig.show()
 
 
-plot_points()
+def get_Xy_until_good(m):
+    """
+    loops until y has both 1 and -1
+    :param m: number of sample
+    :return: X,y
+    """
+    while True:  # must have both +1 and -1 in y
+        X, y = draw_points(m)
+        if 1 in y and -1 in y:
+            break
+    return X, y
+
+
+def accuracy(y, y_hat):
+    """
+    :param y: true values
+    :param y_hat: response vector
+    :return: the accuracy of y (ratio between number of corret values / total size)
+    """
+    return sum([1 for i in range(len(y)) if y[i] == y_hat[i]]) / len(y)
+
+
+def q10():
+    m_vals = [5, 10, 15, 25, 70]
+    accuracies = {"Perceptron": [], "SVM": [], "LDA": []}
+    models = {"Perceptron": Perceptron(), "SVM": SVM(), "LDA": LDA()}
+    k = 10000
+    repeat = 500
+    for m in m_vals:
+        for i in range(repeat):
+            X_train, y_train = get_Xy_until_good(m)
+            X_test, y_test = get_Xy_until_good(k)
+            for model in models:
+                models[model].fit(X_train, y_train)
+                y_hat = models[model].predict(X_test)
+                accuracies[model].append(accuracy(y_test, y_hat))
+    return accuracies
+
+
+q10()
