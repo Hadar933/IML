@@ -1,8 +1,10 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import plotly.io as pio
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from models import Perceptron, SVM, LDA
+import plotly.express as px
 
 pio.renderers.default = "browser"
 
@@ -85,19 +87,39 @@ def accuracy(y, y_hat):
 
 def q10():
     m_vals = [5, 10, 15, 25, 70]
-    accuracies = {"Perceptron": [], "SVM": [], "LDA": []}
+    all_accuracies = []
     models = {"Perceptron": Perceptron(), "SVM": SVM(), "LDA": LDA()}
     k = 10000
     repeat = 500
     for m in m_vals:
+        acc_dict = {"Perceptron": [], "SVM": [], "LDA": []}
         for i in range(repeat):
             X_train, y_train = get_Xy_until_good(m)
             X_test, y_test = get_Xy_until_good(k)
             for model in models:
                 models[model].fit(X_train, y_train)
                 y_hat = models[model].predict(X_test)
-                accuracies[model].append(accuracy(y_test, y_hat))
-    return accuracies
+                acc_dict[model].append(accuracy(y_test, y_hat))
+        all_accuracies.append(acc_dict)
+
+    for dictionary in all_accuracies:
+        for model in dictionary:
+            dictionary[model] = np.mean(np.array(dictionary[model]))
+    return all_accuracies
 
 
-q10()
+def plot_accuracies(acc):
+    y_data = [[acc[i][model_name] for i in range(len(acc))] for model_name in ["Perceptron", "SVM", "LDA"]]
+    x_data = [5, 10, 15, 25, 70]
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=x_data, y=y_data[0], mode='lines+markers', name='Perceptron'))
+    fig.add_trace(go.Scatter(x=x_data, y=y_data[1], mode='lines+markers', name='SVM'))
+    fig.add_trace(go.Scatter(x=x_data, y=y_data[2], mode='lines+markers', name='LDA'))
+    fig.update_layout(title=rf"$\text{{Mean Accuracy as a function of m samples}}$")
+    fig.update_xaxes(title_text=rf"$\text{{samples (m)}}$")
+    fig.update_yaxes(title_text=rf"$\text{{Mean Accuracy}}$")
+    fig.show()
+
+
+a = q10()
+plot_accuracies(a)
