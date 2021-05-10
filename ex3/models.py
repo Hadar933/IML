@@ -92,13 +92,12 @@ class LDA(Classifier):
         self.d_neg = None  # delta neg function
 
     def fit(self, X, y):
-        new_X = np.insert(X, 0, 1, axis=1)
-        X_pos = new_X[y == 1]
-        X_neg = new_X[y == -1]
+        X_pos = X[y == 1]
+        X_neg = X[y == -1]
 
         mu_pos = np.array([np.mean(row) for row in X_pos.T])
         mu_neg = np.array([np.mean(row) for row in X_neg.T])
-        sigma_inv = np.linalg.pinv(np.cov(new_X.T))
+        sigma_inv = np.linalg.pinv(np.cov(X.T))
         prob_pos = sum([1 for i in y if i == 1]) / len(y)
         prob_neg = sum([1 for i in y if i == -1]) / len(y)
 
@@ -107,12 +106,10 @@ class LDA(Classifier):
 
     def predict(self, X):
         m = X.shape[0]
-        new_X = np.insert(X, 0, 1, axis=1)
-
-        d_pos_arr = [self.d_pos(x) for x in new_X]
-        d_neg_arr = [self.d_neg(x) for x in new_X]
+        d_pos_arr = [self.d_pos(x) for x in X]
+        d_neg_arr = [self.d_neg(x) for x in X]
         argmax_index = [np.argmax([d_pos_arr[i], d_neg_arr[i]]) for i in range(m)]
-        return [-1 if argmax_index[i] == 0 else 1 for i in range(m)]
+        return [1 if argmax_index[i] == 0 else -1 for i in range(m)]
 
     def score(self, X, y):
         return super().score(X, y)
