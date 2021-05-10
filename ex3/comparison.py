@@ -84,6 +84,10 @@ def accuracy(y, y_hat):
 
 
 def q10():
+    """
+    calculate the accuracy rates for perceptron, svm and lda classifiers
+    :return: accuracy data
+    """
     m_vals = [5, 10, 15, 25, 70]
     all_accuracies = []
     models = {"Perceptron": Perceptron(), "SVM": SVM(), "LDA": LDA()}
@@ -106,8 +110,7 @@ def q10():
     return all_accuracies
 
 
-def plot_accuracies(acc, x_data):
-    names = ["Perceptron", "SVM", "LDA"]
+def plot_accuracies(acc, x_data, names):
     y_data = [[acc[i][model_name] for i in range(len(acc))] for model_name in names]
     fig = go.Figure()
     for i in range(len(names)):
@@ -118,5 +121,5 @@ def plot_accuracies(acc, x_data):
     fig.show()
 
 
-a = q10()
-plot_accuracies(a, [5, 10, 15, 25, 70])
+acc = q10()
+plot_accuracies(acc, [5, 10, 15, 25, 70], ["Perceptron", "SVM", "LDA"])
