@@ -89,7 +89,3 @@ def q14():
             d[model] = np.mean(np.array(d[model]))
     return all_accuracies, all_times
 
-#
-# acc_times = q14()
-# plot_accuracies(acc_times[0], [50, 100, 300, 500], ["Logistic", "SVM", "TREE", "KNN"]) # accuracy plot
-# plot_accuracies(acc_times[1], [50, 100, 300, 500], ["Logistic", "SVM", "TREE", "KNN"]) # time plot

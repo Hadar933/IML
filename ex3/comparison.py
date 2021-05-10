@@ -120,6 +120,3 @@ def plot_accuracies(acc, x_data, names):
     fig.update_yaxes(title_text=rf"$\text{{Mean Accuracy}}$")
     fig.show()
 
-
-acc = q10()
-plot_accuracies(acc, [5, 10, 15, 25, 70], ["Perceptron", "SVM", "LDA"])
