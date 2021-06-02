@@ -76,12 +76,12 @@ class AdaBoost(object):
         return len(y[y != y_hat]) / len(y)
 
 
-def q13():
+def q13(noise):
     """
     trains ada-boost and plots the training error and test error as a function of T
     """
     # training adaboost:
-    train_samples, test_samples, noise, T = 5000, 200, 0, 500
+    train_samples, test_samples, T = 5000, 200, 500
     X_train, y_train = generate_data(train_samples, noise)
     X_test, y_test = generate_data(test_samples, noise)
     ab = AdaBoost(DecisionStump, T)
@@ -103,14 +103,14 @@ def q13():
     plt.show()
 
 
-def q14():
+def q14(noise):
     """
     plot the decisions of the learned classifiers for some various T's,
     together with the test data
     :return:
     """
-    X_train, y_train = generate_data(5000, 0)
-    X_test, y_test = generate_data(200, 0)
+    X_train, y_train = generate_data(5000, noise)
+    X_test, y_test = generate_data(200, noise)
     T = [5, 10, 50, 100, 200, 500]
     for ind, t in enumerate(T):
         ab = AdaBoost(DecisionStump, t)
@@ -121,15 +121,15 @@ def q14():
     plt.show()
 
 
-def q15():
+def q15(noise):
     """
     find the T that minimizes the test error and plots
     the boundaries for such T
     """
     T = 500
     test_err_lst = []
-    X_train, y_train = generate_data(5000, 0)
-    X_test, y_test = generate_data(200, 0)
+    X_train, y_train = generate_data(5000, noise)
+    X_test, y_test = generate_data(200, noise)
     for t in range(T):
         ab = AdaBoost(DecisionStump, t)
         ab.train(X_train, y_train)
@@ -143,12 +143,30 @@ def q15():
     plt.show()
 
 
-def q16():
+def q16(noise):
     """
-
+    plotting classification with weights
     :return:
     """
+    T = 500
+    X_train, y_train = generate_data(5000, noise)
+    ab = AdaBoost(DecisionStump, T)
+    D = ab.train(X_train, y_train)
+    D = D / np.max(D) * 10  # normalizing
+    decision_boundaries(ab, X_train, y_train, T, D)
+    plt.show()
+
+
+def q17():
+    """
+    repeat the process with error rate
+    """
+    for noise in [0.01, 0.04]:
+        q13(noise)
+        q14(noise)
+        q15(noise)
+        q16(noise)
 
 
 if __name__ == '__main__':
-    q16()
+    q17()
