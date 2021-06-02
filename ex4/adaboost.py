@@ -167,5 +167,3 @@ def q17():
         q16(noise)
 
 
-if __name__ == '__main__':
-    q17()
