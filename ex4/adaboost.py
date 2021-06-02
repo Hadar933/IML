@@ -8,6 +8,8 @@ Skeleton for the AdaBoost classifier.
 """
 import matplotlib.pyplot as plt
 import numpy as np
+
+import ex4_tools
 from ex4_tools import *
 
 
@@ -37,7 +39,7 @@ class AdaBoost(object):
         m = X.shape[0]
         D = np.ones(m) / m  # uniform initial distribution
         for t in range(self.T):
-            h = DecisionStump(D, X, y)
+            h = self.WL(D, X, y)
             self.h[t] = h
             y_hat = h.predict(X)  # current prediction
             disagree = y_hat - y
@@ -47,6 +49,7 @@ class AdaBoost(object):
             self.w[t] = w
             D = D * np.exp(-y * w * y_hat)  # element-wise
             D /= np.sum(D)  # normalize
+        return D
 
     def predict(self, X, max_t):
         """
@@ -57,7 +60,10 @@ class AdaBoost(object):
         :return: y_hat : a prediction vector for X. shape=(num_samples)
         Predict only with max_t weak learners,
         """
-        return np.sign(np.sum([self.w[i] * self.h[i].predict(X) for i in range(max_t)]))
+        predict = [self.w[i] * self.h[i].predict(X) for i in range(1, max_t)]
+        ret = np.sign(sum(predict))
+
+        return ret
 
     def error(self, X, y, max_t):
         """
@@ -76,34 +82,40 @@ def q13():
     """
     trains ada-boost and plots the training error and test error as a function of T
     """
-    # training algorithm:
-    train_samples, test_samples, noise, T = 500, 200, 0, 500
+    # training adaboost:
+    train_samples, test_samples, noise, T = 5000, 200, 0, 500
     X_train, y_train = generate_data(train_samples, noise)
     X_test, y_test = generate_data(test_samples, noise)
-    m = X_train.shape[0]
-    D = np.ones(m) / m
-    ds = DecisionStump(D, X_train, y_train)
-    ab = AdaBoost(ds, T)
+    ab = AdaBoost(DecisionStump, T)
     ab.train(X_train, y_train)
 
     # getting error rates:
     test_err = []
     train_err = []
-    for max_t in range(T):
+    for max_t in range(1, T):
         test_err.append(ab.error(X_train, y_train, max_t))
         train_err.append(ab.error(X_test, y_test, max_t))
 
     # plotting
-    x = [i for i in range(T)]
-    plt.plot(x, test_err)
-    plt.plot(x, train_err)
-    plt.title("AdaBoost Error")
-    plt.xlabel("T")
-    plt.ylabel("Error")
+    x = [i for i in range(1, T)]
+    plt.plot(x, test_err), plt.plot(x, train_err)
+    plt.title("AdaBoost Error"), plt.xlabel("T"), plt.ylabel("Error")
     plt.legend(["Test Error", "Train Error"])
     plt.grid()
     plt.show()
 
 
+def q14():
+    """
+    plot the decisions of the learned classifiers for some various T's,
+    together with the test data
+    :return:
+    """
+    X, y = generate_data(5000, 0)
+    T = [5, 10, 50, 100, 200, 500]
+    for t in T:
+        decision_boundaries(AdaBoost(DecisionStump, t), X, y)
+
+
 if __name__ == '__main__':
-    q13()
+    q14()

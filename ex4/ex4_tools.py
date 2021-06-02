@@ -123,4 +123,3 @@ def generate_data(num_samples, noise_ratio):
     y[np.random.choice(num_samples, int(noise_ratio * num_samples))] *= -1
 
     return X, y
-
