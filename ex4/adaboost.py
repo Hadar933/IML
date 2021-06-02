@@ -161,7 +161,7 @@ def q17():
     """
     repeat the process with error rate
     """
-    for noise in [0.01, 0.04]:
+    for noise in [0.01, 0.4]:
         q13(noise)
         q14(noise)
         q15(noise)
