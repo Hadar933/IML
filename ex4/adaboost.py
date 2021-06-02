@@ -60,10 +60,8 @@ class AdaBoost(object):
         :return: y_hat : a prediction vector for X. shape=(num_samples)
         Predict only with max_t weak learners,
         """
-        predict = [self.w[i] * self.h[i].predict(X) for i in range(1, max_t)]
-        ret = np.sign(sum(predict))
-
-        return ret
+        predict = [self.w[i] * self.h[i].predict(X) for i in range(max_t)]
+        return np.sign(sum(predict))
 
     def error(self, X, y, max_t):
         """
@@ -92,12 +90,12 @@ def q13():
     # getting error rates:
     test_err = []
     train_err = []
-    for max_t in range(1, T):
+    for max_t in range(T):
         test_err.append(ab.error(X_train, y_train, max_t))
         train_err.append(ab.error(X_test, y_test, max_t))
 
     # plotting
-    x = [i for i in range(1, T)]
+    x = [i for i in range(T)]
     plt.plot(x, test_err), plt.plot(x, train_err)
     plt.title("AdaBoost Error"), plt.xlabel("T"), plt.ylabel("Error")
     plt.legend(["Test Error", "Train Error"])
@@ -111,11 +109,46 @@ def q14():
     together with the test data
     :return:
     """
-    X, y = generate_data(5000, 0)
+    X_train, y_train = generate_data(5000, 0)
+    X_test, y_test = generate_data(200, 0)
     T = [5, 10, 50, 100, 200, 500]
-    for t in T:
-        decision_boundaries(AdaBoost(DecisionStump, t), X, y)
+    for ind, t in enumerate(T):
+        ab = AdaBoost(DecisionStump, t)
+        ab.train(X_train, y_train)
+        plt.subplot(2, 3, ind + 1)
+        decision_boundaries(ab, X_test, y_test, t)
+        plt.title(f"{t} classifiers")
+    plt.show()
+
+
+def q15():
+    """
+    find the T that minimizes the test error and plots
+    the boundaries for such T
+    """
+    T = 500
+    test_err_lst = []
+    X_train, y_train = generate_data(5000, 0)
+    X_test, y_test = generate_data(200, 0)
+    for t in range(T):
+        ab = AdaBoost(DecisionStump, t)
+        ab.train(X_train, y_train)
+        curr_error = ab.error(X_test, y_test, t)
+        test_err_lst.append((curr_error, ab, t))
+        print(f"{t}")
+    best_val = min(test_err_lst, key=lambda t: t[0])  # get min by first element
+    err, ab, t = best_val
+    decision_boundaries(ab, X_train, y_train, t)
+    plt.title(f"best T={t}, giving test error of {err}")
+    plt.show()
+
+
+def q16():
+    """
+
+    :return:
+    """
 
 
 if __name__ == '__main__':
-    q14()
+    q16()

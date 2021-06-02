@@ -100,7 +100,7 @@ def decision_boundaries(classifier, X, y, num_classifiers=1, weights=None):
     if weights is not None:
         plt.scatter(X[:, 0], X[:, 1], c=y, s=weights, cmap=cm_bright)
     else:
-        plt.scatter(X[:, 0], X[:, 1], c=y, cmap=cm_bright)
+        plt.scatter(X[:, 0], X[:, 1], c=y, s=5, cmap=cm_bright)
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
     plt.xticks([])
