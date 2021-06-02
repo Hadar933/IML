@@ -135,7 +135,6 @@ def q15(noise):
         ab.train(X_train, y_train)
         curr_error = ab.error(X_test, y_test, t)
         test_err_lst.append((curr_error, ab, t))
-        print(f"{t}")
     best_val = min(test_err_lst, key=lambda t: t[0])  # get min by first element
     err, ab, t = best_val
     decision_boundaries(ab, X_train, y_train, t)
