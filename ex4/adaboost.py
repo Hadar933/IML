@@ -6,6 +6,7 @@
 Skeleton for the AdaBoost classifier.
 
 """
+import matplotlib.pyplot as plt
 import numpy as np
 from ex4_tools import *
 
@@ -34,13 +35,13 @@ class AdaBoost(object):
         After finish the training return the weights of the samples in the last iteration.
         """
         m = X.shape[0]
-        D = np.full((1, m), 1 / m)  # uniform initial distribution
+        D = np.ones(m) / m  # uniform initial distribution
         for t in range(self.T):
-            h = self.WL(D, X, y)
+            h = DecisionStump(D, X, y)
             self.h[t] = h
             y_hat = h.predict(X)  # current prediction
-            diff = y_hat - y
-            disagree = diff[diff != 0] = 1  # = 1[yi != h(xi)]
+            disagree = y_hat - y
+            disagree[disagree != 0] = 1  # = 1[yi != h(xi)]
             error_t = np.dot(D, disagree)  # weighted sum
             w = 0.5 * np.log(1 / error_t - 1)
             self.w[t] = w
@@ -67,14 +68,42 @@ class AdaBoost(object):
         :param max_t: integer < self.T: the number of classifiers to use for the classification
         :return: error : the ratio of the wrong predictions when predict only with max_t weak learners (float)
         """
-        # TODO complete this function
+        y_hat = self.predict(X, max_t)
+        return len(y[y != y_hat]) / len(y)
+
+
+def q13():
+    """
+    trains ada-boost and plots the training error and test error as a function of T
+    """
+    # training algorithm:
+    train_samples, test_samples, noise, T = 500, 200, 0, 500
+    X_train, y_train = generate_data(train_samples, noise)
+    X_test, y_test = generate_data(test_samples, noise)
+    m = X_train.shape[0]
+    D = np.ones(m) / m
+    ds = DecisionStump(D, X_train, y_train)
+    ab = AdaBoost(ds, T)
+    ab.train(X_train, y_train)
+
+    # getting error rates:
+    test_err = []
+    train_err = []
+    for max_t in range(T):
+        test_err.append(ab.error(X_train, y_train, max_t))
+        train_err.append(ab.error(X_test, y_test, max_t))
+
+    # plotting
+    x = [i for i in range(T)]
+    plt.plot(x, test_err)
+    plt.plot(x, train_err)
+    plt.title("AdaBoost Error")
+    plt.xlabel("T")
+    plt.ylabel("Error")
+    plt.legend(["Test Error", "Train Error"])
+    plt.grid()
+    plt.show()
 
 
 if __name__ == '__main__':
-    X, y = generate_data(10, 2)
-
-    m = X.shape[0]
-    D = np.full((m, 1), 1 / m)
-    ds = DecisionStump(D, X, y)
-    ab = AdaBoost(ds, 5)
-    ab.train(X, y)
+    q13()

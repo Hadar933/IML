@@ -24,9 +24,7 @@ def find_threshold(D, X, y, sign, j):
     """
     # sort the data so that x1 <= x2 <= ... <= xm
     sort_idx = np.argsort(X[:, j])
-    X= X[sort_idx]
-    y = y[sort_idx]
-    D = D[sort_idx]
+    X, y, D = X[sort_idx], y[sort_idx], D[sort_idx]
 
     thetas = np.concatenate([[-np.inf], (X[1:, j] + X[:-1, j]) / 2, [np.inf]])
     minimal_theta_loss = np.sum(D[y == sign])  # loss of the smallest possible theta
@@ -125,3 +123,4 @@ def generate_data(num_samples, noise_ratio):
     y[np.random.choice(num_samples, int(noise_ratio * num_samples))] *= -1
 
     return X, y
+
