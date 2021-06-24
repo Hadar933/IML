@@ -54,12 +54,14 @@ def plot_2fold_error():
     plt.grid(), plt.show()
 
 
-def set_kfold_data(k_fold=5, x_D=X[:1000], y_D=y[:1000]):
+def set_kfold_data(k, k_fold=5, x_D=X[:1000], y_D=y[:1000]):
     """
     separates the data to S,V,T for k-fold, initialized with 5
     """
-    seperator = np.remainder(np.arange(x_D.size), k_fold)
-    # x_S_fold = x_D[seperator !=]
+    separator = np.remainder(np.arange(x_D.size), k_fold)
+    x_S_fold, y_S_fold = x_D[separator != k], y_D[separator != k]
+    x_V_fold, y_V_fold = x_D[separator == k], y_D[separator == k]
+    return x_S_fold, y_S_fold, x_V_fold, y_V_fold
 
 
 def kfold_error(kfold):
@@ -69,11 +71,12 @@ def kfold_error(kfold):
     valid_err = np.zeros(poly_deg)
     train_err = np.zeros(poly_deg)
     for k in range(kfold):
-        h_s = [fit_polynomial(x_S, y_S, d + 1) for d in range(poly_deg)]
-        y_hat_V_arr = [h_s[d].predict(x_V.reshape(-1, 1)) for d in range(poly_deg)]
-        y_hat_S_arr = [h_s[d].predict(x_S.reshape(-1, 1)) for d in range(poly_deg)]
-        V_err = [mean_squared_error(y_hat_V, y_V) for y_hat_V in y_hat_V_arr]
-        S_err = [mean_squared_error(y_hat_S, y_S) for y_hat_S in y_hat_S_arr]
+        x_S_fold, y_S_fold, x_V_fold, y_V_fold = set_kfold_data(k)
+        h_s = [fit_polynomial(x_S_fold, y_S_fold, d + 1) for d in range(poly_deg)]
+        y_hat_V_arr = [h_s[d].predict(x_V_fold.reshape(-1, 1)) for d in range(poly_deg)]
+        y_hat_S_arr = [h_s[d].predict(x_S_fold.reshape(-1, 1)) for d in range(poly_deg)]
+        V_err = [mean_squared_error(y_hat_V, y_V_fold) for y_hat_V in y_hat_V_arr]
+        S_err = [mean_squared_error(y_hat_S, y_S_fold) for y_hat_S in y_hat_S_arr]
         valid_err += np.array(V_err) / kfold  # adding the respective normalized error for every d
         train_err += np.array(S_err) / kfold  # same here, just for S
     return valid_err, train_err
