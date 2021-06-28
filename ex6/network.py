@@ -11,6 +11,7 @@ using backpropagation.
 import random
 import numpy as np
 
+
 class Network(object):
 
     def __init__(self, sizes):
@@ -44,6 +45,7 @@ class Network(object):
         network will be evaluated against the test data after each
         epoch, and partial progress printed out.  This is useful for
         tracking progress, but slows things down substantially."""
+        n_test = 0
         if test_data: n_test = len(list(test_data))
         n = len(list(training_data))
         for j in range(epochs):
@@ -52,10 +54,9 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
-                print("Epoch {0}: {1} / {2}".format(
-                    j, self.evaluate(test_data), n_test)) 
+                print(f"Epoch {j}: {self.evaluate(test_data)} / {n_test}")
             else:
-                print("Epoch {0} complete".format(j))
+                print(f"Epoch {j} complete")
 
     def update_mini_batch(self, mini_batch, eta):
         """Update the network's weights and biases by applying
@@ -66,9 +67,9 @@ class Network(object):
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
-            nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
-            nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights = ##-----------TODO------------##
+            nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
+            nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+        self.weights =  ##-----------TODO------------##
         self.biases =  ##-----------TODO------------##
 
     def backprop(self, x, y):
@@ -78,20 +79,19 @@ class Network(object):
         to ``self.biases`` and ``self.weights``."""
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        
+
         # forward pass
         activation = x
-        activations = [x] # list to store all the activations, layer by layer
-        zs = [] # list to store all the z vectors, layer by layer
+        activations = [x]  # list to store all the activations, layer by layer
+        zs = []  # list to store all the z vectors, layer by layer
         for b, w in zip(self.biases, self.weights):
-            ##-----------TODO------------##
-            ##-----------TODO------------##
-            
+        ##-----------TODO------------##
+        ##-----------TODO------------##
+
         # backward pass
         ##-----------TODO------------##
         ##-----------TODO------------##
-        
-        
+
         return (nabla_b, nabla_w)
 
     def evaluate(self, test_data):
@@ -107,11 +107,14 @@ class Network(object):
         \partial a for the output activations."""
         ##-----------TODO------------##
 
+
 #### Miscellaneous functions
 def sigmoid(z):
     """The sigmoid function."""
-    ##-----------TODO------------##
+    return 1 / (1 + np.exp(-z))
+
 
 def sigmoid_prime(z):
     """Derivative of the sigmoid function."""
-    ##-----------TODO------------##
+    exp = np.exp(-z)
+    return exp / ((1 + exp) ** 2)

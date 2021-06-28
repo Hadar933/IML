@@ -46,7 +46,7 @@ def load_data():
     u.encoding = 'latin1'
     training_data, validation_data, test_data = u.load()
     f.close()
-    return (training_data, validation_data, test_data)
+    return training_data, validation_data, test_data
 
 
 def load_data_wrapper():
@@ -89,3 +89,8 @@ def vectorized_result(j):
     e = np.zeros((10, 1))
     e[j] = 1.0
     return e
+
+
+if __name__ == '__main__':
+    train, validate, test = load_data_wrapper()
+
