@@ -91,6 +91,3 @@ def vectorized_result(j):
     return e
 
 
-if __name__ == '__main__':
-    train, validate, test = load_data_wrapper()
-

@@ -6,10 +6,20 @@ A module to implement the stochastic gradient descent learning
 algorithm for a feedforward neural network.  Gradients are calculated
 using backpropagation.  
 """
-
-#### Libraries
-import random
+import mnist_loader
 import numpy as np
+
+
+def create_mini_batches(data, size):
+    """
+    shuffles the data and splits it to sections of with constant given size
+    :param data:
+    :param size: list of (x,y) tuples
+    :return:
+    """
+    np.random.shuffle(data)
+    mini_batches = np.split(data, size)
+    return mini_batches
 
 
 class Network(object):
@@ -33,9 +43,9 @@ class Network(object):
 
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
-        ##-----------TODO------------##
+        # -----------TODO------------##
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta,
+    def SGD(self, training_data, epochs, mini_batc5h_size, eta,
             test_data=None):
         """Train the neural network using mini-batch stochastic
         gradient descent.  The ``training_data`` is a list of tuples
@@ -46,11 +56,13 @@ class Network(object):
         epoch, and partial progress printed out.  This is useful for
         tracking progress, but slows things down substantially."""
         n_test = 0
-        if test_data: n_test = len(list(test_data))
+        mini_batches = create_mini_batches(np.array(training_data), mini_batc5h_size)
+        if test_data:
+            n_test = len(list(test_data))
         n = len(list(training_data))
         for j in range(epochs):
-            ##-----------TODO------------##
-            ##-----------TODO------------##
+            # -----------TODO------------##
+            # -----------TODO------------##
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
@@ -69,46 +81,49 @@ class Network(object):
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights =  ##-----------TODO------------##
-        self.biases =  ##-----------TODO------------##
+        self.weights -= eta * nabla_w
+        self.biases -= eta * nabla_b
 
     def backprop(self, x, y):
-        """Return a tuple ``(nabla_b, nabla_w)`` representing the
+        """
+        Return a tuple ``(nabla_b, nabla_w)`` representing the
         gradient for the cost function C_x.  ``nabla_b`` and
         ``nabla_w`` are layer-by-layer lists of numpy arrays, similar
-        to ``self.biases`` and ``self.weights``."""
+        to ``self.biases`` and ``self.weights``.
+        """
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
 
-        # forward pass
+        # forward pass : this is recalculation of the output, given the updated weights
         activation = x
         activations = [x]  # list to store all the activations, layer by layer
         zs = []  # list to store all the z vectors, layer by layer
         for b, w in zip(self.biases, self.weights):
-        ##-----------TODO------------##
-        ##-----------TODO------------##
+            pass
+        # -----------TODO------------##
+        # -----------TODO------------##
 
-        # backward pass
-        ##-----------TODO------------##
-        ##-----------TODO------------##
+        # backward pass : this is calculating the weights backwards as weve seen in tirgul
+        # -----------TODO------------##
+        # -----------TODO------------##
 
-        return (nabla_b, nabla_w)
+        return nabla_b, nabla_w
 
     def evaluate(self, test_data):
         """Return the number of test inputs for which the neural
         network outputs the correct result. Note that the neural
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
-        ##-----------TODO------------##
-        ##-----------TODO------------##
+        # -----------TODO------------##
+        # -----------TODO------------##
 
     def cost_derivative(self, output_activations, y):
         """Return the vector of partial derivatives \partial C_x /
         \partial a for the output activations."""
-        ##-----------TODO------------##
+        # -----------TODO------------##
 
 
-#### Miscellaneous functions
+# Miscellaneous functions
 def sigmoid(z):
     """The sigmoid function."""
     return 1 / (1 + np.exp(-z))
@@ -118,3 +133,9 @@ def sigmoid_prime(z):
     """Derivative of the sigmoid function."""
     exp = np.exp(-z)
     return exp / ((1 + exp) ** 2)
+
+
+if __name__ == '__main__':
+    train, validate, test = mnist_loader.load_data_wrapper()
+    nn = Network([2, 3, 1])
+    nn.SGD(train, 5, 500, 0.1)
