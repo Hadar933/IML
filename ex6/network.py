@@ -43,7 +43,9 @@ class Network(object):
 
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
-        # -----------TODO------------##
+        for w, b in zip(self.weights, self.biases):
+            a = sigmoid((w @ a) + b)
+        return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
             test_data=None):
@@ -96,20 +98,20 @@ class Network(object):
         activations = [x]  # list to store all the activations, layer by layer
         zs = []  # list to store all the z vectors, layer by layer
         for b, w in zip(self.biases, self.weights):  # recalculating the z's and a's according to the new b's and w's
-            z = w @ activations[-1] + b
+            z = w @ activation + b
             zs.append(z)
             activation = sigmoid(z)
             activation.append(activation)
 
         # backward pass : calculating the weights backwards as we've seen in class (derivatives)
-        C_vec = self.cost_derivative(activations, y)
-        for t in range(self.num_layers - 1, 1, -1):
-            for i in range(self.sizes[t - 1]):
-                nabla_w[t] = np.sum([self.weights[t][j][i] * nabla_w[t + 1][j] * sigmoid_prime(zs[t + 1][j])
-                                     for j in range(self.sizes[t - 1])])
-                nabla_b[t] = np.sum([self.biases[t - 1][j] * nabla_b[t + 1][j] * sigmoid_prime(zs[t + 1][j])
-                                     for j in range(self.sizes[t - 1])])
-
+        C_vec = self.cost_derivative(activations[-1], y)
+        delta = C_vec * sigmoid(zs[-1])
+        nabla_w[-1] = delta @ activations[-2].T
+        nabla_b[-1] = delta
+        for i in range(2, self.num_layers):
+            delta = sigmoid_prime(zs[-i]) * (self.weights[-i + 1].T @ delta)
+            nabla_w[-i] = delta @ activations[-i - 1].T
+            nabla_b[-i] = delta
         return nabla_b, nabla_w
 
     def evaluate(self, test_data):
