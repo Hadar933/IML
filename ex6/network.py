@@ -59,7 +59,6 @@ class Network(object):
         tracking progress, but slows things down substantially."""
         n_test = 0
         if test_data: n_test = len(list(test_data))
-        n = len(list(training_data))
         for j in range(epochs):
             mini_batches = create_mini_batches(np.array(training_data), mini_batch_size)
             for mini_batch in mini_batches:
@@ -115,18 +114,22 @@ class Network(object):
         return nabla_b, nabla_w
 
     def evaluate(self, test_data):
-        """Return the number of test inputs for which the neural
+        """
+        Return the number of test inputs for which the neural
         network outputs the correct result. Note that the neural
         network's output is assumed to be the index of whichever
-        neuron in the final layer has the highest activation."""
-        # -----------TODO------------##
-        # -----------TODO------------##
+        neuron in the final layer has the highest activation.
+        """
+        network_ret = np.array([np.argmax(self.feedforward(x)) for (x, y) in test_data])
+        all_y = np.array([y for (x, y) in test_data])
+        return np.sum(np.where(network_ret == all_y))
 
     def cost_derivative(self, output_activations, y):
-        """Return the vector of partial derivatives \partial C_x /
-        \partial a for the output activations."""
-        # TODO
-        return output_activations
+        """
+        Return the vector of partial derivatives partial C_x /
+        partial a for the output activations.
+        """
+        return output_activations - y
 
 
 # Miscellaneous functions
