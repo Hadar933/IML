@@ -6,23 +6,36 @@ A module to implement the stochastic gradient descent learning
 algorithm for a feedforward neural network.  Gradients are calculated
 using backpropagation.  
 """
+import random
+
+import matplotlib.pyplot as plt
+
 import mnist_loader
+
 import numpy as np
 
 
-def create_mini_batches(data, size):
+def create_mini_batches(train_data, size):
     """
-    shuffles the data and splits it to sections of with constant given size
-    :param data:
+    shuffles the data and splits it to sections of constant given size
+    :param train_data: the training data provided
     :param size: list of (x,y) tuples
     :return:
     """
-    np.random.shuffle(data)
-    mini_batches = np.split(data, size)
+    np.random.shuffle(train_data)
+    mini_batches = [train_data[i:i + size] for i in range(0,len(train_data), size)]
     return mini_batches
 
 
-class Network(object):
+def cost_derivative(output_activations, y):
+    """
+    Return the vector of partial derivatives partial C_x /
+    partial a for the output activations.
+    """
+    return output_activations - y
+
+
+class Network:
 
     def __init__(self, sizes):
         """The list ``sizes`` contains the number of neurons in the
@@ -40,6 +53,8 @@ class Network(object):
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(y, x)
                         for x, y in zip(sizes[:-1], sizes[1:])]
+        self.epochs = []  # x axis for later plots
+        self.accuracies = []  # y axis for later plots
 
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
@@ -57,14 +72,16 @@ class Network(object):
         network will be evaluated against the test data after each
         epoch, and partial progress printed out.  This is useful for
         tracking progress, but slows things down substantially."""
-        n_test = 0
         if test_data: n_test = len(list(test_data))
         for j in range(epochs):
-            mini_batches = create_mini_batches(np.array(training_data), mini_batch_size)
+            mini_batches = create_mini_batches(training_data,mini_batch_size)
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
-                print(f"Epoch {j}: {self.evaluate(test_data)} / {n_test}")
+                eval = self.evaluate(test_data)
+                print(f"Epoch {j}: {eval} / {n_test}")
+                self.epochs.append(j)  # this will be used for later plots
+                self.accuracies.append(eval / n_test)  # same
             else:
                 print(f"Epoch {j} complete")
 
@@ -100,14 +117,14 @@ class Network(object):
             z = w @ activation + b
             zs.append(z)
             activation = sigmoid(z)
-            activation.append(activation)
+            activations.append(activation)
 
         # backward pass : calculating the weights backwards as we've seen in class (derivatives)
-        C_vec = self.cost_derivative(activations[-1], y)
+        C_vec = cost_derivative(activations[-1], y)
         delta = C_vec * sigmoid(zs[-1])
         nabla_w[-1] = delta @ activations[-2].T
         nabla_b[-1] = delta
-        for i in range(2, self.num_layers):
+        for i in range(2, self.num_layers):  # iterating backwards
             delta = sigmoid_prime(zs[-i]) * (self.weights[-i + 1].T @ delta)
             nabla_w[-i] = delta @ activations[-i - 1].T
             nabla_b[-i] = delta
@@ -122,14 +139,7 @@ class Network(object):
         """
         network_ret = np.array([np.argmax(self.feedforward(x)) for (x, y) in test_data])
         all_y = np.array([y for (x, y) in test_data])
-        return np.sum(np.where(network_ret == all_y))
-
-    def cost_derivative(self, output_activations, y):
-        """
-        Return the vector of partial derivatives partial C_x /
-        partial a for the output activations.
-        """
-        return output_activations - y
+        return np.sum(network_ret == all_y)
 
 
 # Miscellaneous functions
@@ -144,10 +154,31 @@ def sigmoid_prime(z):
     return exp / ((1 + exp) ** 2)
 
 
+def set_network(train, test, sizes, epoch, mini_batch_size, learning_rate):
+    """
+    sets up the network with the wanted parameters and trains it
+    :param num_layers: not including input layer and output layer
+    :return: trained network
+    """
+    my_net = Network(sizes)
+    my_net.SGD(train, epoch, mini_batch_size, learning_rate, test_data=test)
+    return my_net
+
+
+def plot(x_data, y_data, title, x_title="Epochs", y_title="Accuracy"):
+    plt.plot(x_data, y_data)
+    plt.title(title)
+    plt.xlabel(x_title)
+    plt.ylabel(y_title)
+
+
 if __name__ == '__main__':
+    sizes = [784, 30, 10]
     train, validate, test = mnist_loader.load_data_wrapper()
-    train = train[:500]
-    validate = validate[:100]
-    test = test[:100]
-    nn = Network([2, 3, 1])
-    nn.SGD(train, 5, 10, 0.1)
+    accuracy = []
+    epochs = [i for i in range(30)]
+    for eta in [3, 5, 30]:
+        nn = set_network(train, test, sizes, epoch=30, mini_batch_size=10, learning_rate=eta)
+        plot(nn.epochs, nn.accuracies, title=r"Epoch vs Accuracy for various $\eta$'s")
+    plt.legend([r"$\eta$=3", r"$\eta$=5", r"$\eta$=15", r"$\eta$=30"])
+    plt.show()
