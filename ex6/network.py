@@ -45,7 +45,7 @@ class Network(object):
         """Return the output of the network if ``a`` is input."""
         # -----------TODO------------##
 
-    def SGD(self, training_data, epochs, mini_batc5h_size, eta,
+    def SGD(self, training_data, epochs, mini_batch_size, eta,
             test_data=None):
         """Train the neural network using mini-batch stochastic
         gradient descent.  The ``training_data`` is a list of tuples
@@ -56,13 +56,10 @@ class Network(object):
         epoch, and partial progress printed out.  This is useful for
         tracking progress, but slows things down substantially."""
         n_test = 0
-        mini_batches = create_mini_batches(np.array(training_data), mini_batc5h_size)
-        if test_data:
-            n_test = len(list(test_data))
+        if test_data: n_test = len(list(test_data))
         n = len(list(training_data))
         for j in range(epochs):
-            # -----------TODO------------##
-            # -----------TODO------------##
+            mini_batches = create_mini_batches(np.array(training_data), mini_batch_size)
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
@@ -81,8 +78,8 @@ class Network(object):
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights -= eta * nabla_w
-        self.biases -= eta * nabla_b
+        self.weights = [w - (eta / len(mini_batch) * nw) for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b - (eta / len(mini_batch) * nb) for b, nb in zip(self.biases, nabla_b)]
 
     def backprop(self, x, y):
         """
@@ -94,18 +91,24 @@ class Network(object):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
 
-        # forward pass : this is recalculation of the output, given the updated weights
+        # forward pass:
         activation = x
         activations = [x]  # list to store all the activations, layer by layer
         zs = []  # list to store all the z vectors, layer by layer
-        for b, w in zip(self.biases, self.weights):
-            pass
-        # -----------TODO------------##
-        # -----------TODO------------##
+        for b, w in zip(self.biases, self.weights):  # recalculating the z's and a's according to the new b's and w's
+            z = w @ activations[-1] + b
+            zs.append(z)
+            activation = sigmoid(z)
+            activation.append(activation)
 
-        # backward pass : this is calculating the weights backwards as weve seen in tirgul
-        # -----------TODO------------##
-        # -----------TODO------------##
+        # backward pass : calculating the weights backwards as we've seen in class (derivatives)
+        C_vec = self.cost_derivative(activations, y)
+        for t in range(self.num_layers - 1, 1, -1):
+            for i in range(self.sizes[t - 1]):
+                nabla_w[t] = np.sum([self.weights[t][j][i] * nabla_w[t + 1][j] * sigmoid_prime(zs[t + 1][j])
+                                     for j in range(self.sizes[t - 1])])
+                nabla_b[t] = np.sum([self.biases[t - 1][j] * nabla_b[t + 1][j] * sigmoid_prime(zs[t + 1][j])
+                                     for j in range(self.sizes[t - 1])])
 
         return nabla_b, nabla_w
 
@@ -120,7 +123,8 @@ class Network(object):
     def cost_derivative(self, output_activations, y):
         """Return the vector of partial derivatives \partial C_x /
         \partial a for the output activations."""
-        # -----------TODO------------##
+        # TODO
+        return output_activations
 
 
 # Miscellaneous functions
@@ -137,5 +141,8 @@ def sigmoid_prime(z):
 
 if __name__ == '__main__':
     train, validate, test = mnist_loader.load_data_wrapper()
+    train = train[:500]
+    validate = validate[:100]
+    test = test[:100]
     nn = Network([2, 3, 1])
-    nn.SGD(train, 5, 500, 0.1)
+    nn.SGD(train, 5, 10, 0.1)
