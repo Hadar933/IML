@@ -23,7 +23,7 @@ def create_mini_batches(train_data, size):
     :return:
     """
     np.random.shuffle(train_data)
-    mini_batches = [train_data[i:i + size] for i in range(0,len(train_data), size)]
+    mini_batches = [train_data[i:i + size] for i in range(0, len(train_data), size)]
     return mini_batches
 
 
@@ -74,7 +74,7 @@ class Network:
         tracking progress, but slows things down substantially."""
         if test_data: n_test = len(list(test_data))
         for j in range(epochs):
-            mini_batches = create_mini_batches(training_data,mini_batch_size)
+            mini_batches = create_mini_batches(training_data, mini_batch_size)
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
@@ -118,7 +118,7 @@ class Network:
             activation = sigmoid(z)
             activations.append(activation)
         # backward pass : calculating the weights backwards as we've seen in class (derivatives)
-        delta = sigmoid_prime(zs[-1])*cost_derivative(activations[-1], y)
+        delta = sigmoid_prime(zs[-1]) * cost_derivative(activations[-1], y)
         nabla_w[-1] = delta @ activations[-2].T
         nabla_b[-1] = delta
         for i in range(2, self.num_layers):  # iterating backwards
@@ -163,6 +163,9 @@ def set_network(train, test, sizes, epoch, mini_batch_size, learning_rate):
 
 
 def plot(x_data, y_data, title, x_title="Epochs", y_title="Accuracy"):
+    """
+    basic function that plots data
+    """
     plt.plot(x_data, y_data)
     plt.title(title)
     plt.xlabel(x_title)
@@ -170,12 +173,10 @@ def plot(x_data, y_data, title, x_title="Epochs", y_title="Accuracy"):
 
 
 if __name__ == '__main__':
-    sizes = [784, 30, 10]
     train, validate, test = mnist_loader.load_data_wrapper()
-    accuracy = []
-    epochs = [i for i in range(30)]
-    for eta in [3, 5, 30]:
-        nn = set_network(train, test, sizes, epoch=30, mini_batch_size=10, learning_rate=eta)
-        plot(nn.epochs, nn.accuracies, title=r"Epoch vs Accuracy for various $\eta$'s")
-    plt.legend([r"$\eta$=3", r"$\eta$=5", r"$\eta$=15", r"$\eta$=30"])
+    sizes_arr = [[784, 30, 10], [784, 100, 10], [784, 30, 30, 10]]
+    for sizes in sizes_arr:
+        nn = set_network(train, test, sizes, epoch=30, mini_batch_size=50, learning_rate=3)
+        plot(nn.epochs, nn.accuracies, title=r"Epoch vs Accuracy for various Architectures")
+    plt.legend([f"layers={sizes}" for sizes in sizes_arr])
     plt.show()
