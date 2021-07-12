@@ -154,7 +154,6 @@ def sigmoid_prime(z):
 def set_network(train, test, sizes, epoch, mini_batch_size, learning_rate):
     """
     sets up the network with the wanted parameters and trains it
-    :param num_layers: not including input layer and output layer
     :return: trained network
     """
     my_net = Network(sizes)
