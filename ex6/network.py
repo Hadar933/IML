@@ -108,7 +108,6 @@ class Network:
         """
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-
         # forward pass:
         activation = x
         activations = [x]  # list to store all the activations, layer by layer
@@ -118,10 +117,8 @@ class Network:
             zs.append(z)
             activation = sigmoid(z)
             activations.append(activation)
-
         # backward pass : calculating the weights backwards as we've seen in class (derivatives)
-        C_vec = cost_derivative(activations[-1], y)
-        delta = C_vec * sigmoid(zs[-1])
+        delta = sigmoid_prime(zs[-1])*cost_derivative(activations[-1], y)
         nabla_w[-1] = delta @ activations[-2].T
         nabla_b[-1] = delta
         for i in range(2, self.num_layers):  # iterating backwards
