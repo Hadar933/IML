@@ -6,4 +6,4 @@
  * ex3: half space classification: Perceptron & LDA 
  * ex4: AdaBoost algorithm
  * ex5: kFold cross validation & regularization
- * ex6: MNIST feedforward neural net
+ * ex6: MNIST feedforward neural net (from scratch)
